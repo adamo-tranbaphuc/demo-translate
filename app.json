@@ -1,0 +1,13 @@
+{
+  "name": "DemoTranslate",
+  "displayName": "DemoTranslate",
+  "plugins": [
+    [
+      "@react-native-voice/voice",
+      {
+        "microphonePermission": "CUSTOM: Allow App to access the microphone",
+        "speechRecognitionPermission": "CUSTOM: Allow App to securely recognize user speech"
+      }
+    ]
+  ]
+}

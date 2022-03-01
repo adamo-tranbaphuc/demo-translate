@@ -1,0 +1,3 @@
+export {
+    postTranslate
+} from './translatesAPI'
