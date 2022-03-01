@@ -57,7 +57,7 @@ const Home = () => {
     const startRecognizing = async () => {
         //Starts listening for speech for a specific locale
         try {
-            await Voice.start('vi-VI');
+            await Voice.start('ja-JP');
             setRecordStatus(true);
         } catch (e) {
             //eslint-disable-next-line
@@ -77,7 +77,7 @@ const Home = () => {
     };
 
     const translate = useCallback(async (value) => {
-        let resultTranslate = await postTranslate(value, 'vi', 'en')
+        let resultTranslate = await postTranslate(value, 'ja', 'en')
         refResultText.current.setNativeProps({text: resultTranslate})
     }, [])
 
