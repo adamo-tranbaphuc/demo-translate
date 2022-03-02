@@ -13,15 +13,13 @@ import {
 } from 'react-native';
 
 import Home from "./src/containers/home";
-import Appccc from "./src/containers/home/a";
 
 
 const App: () => Node = () => {
 
   return (
-    <SafeAreaView style={{flex:1}}>
+    <SafeAreaView style={{flex:1, backgroundColor:'red'}}>
       <Home/>
-      {/*<Appccc/>*/}
     </SafeAreaView>
   );
 };

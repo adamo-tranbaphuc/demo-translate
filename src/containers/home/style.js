@@ -8,6 +8,7 @@ import {SHADOW_2, SHADOW_3, SHADOW_5} from "../../utils/consts/shadows";
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor:'red'
     },
     txtNameApp: {
         fontSize: 30,
