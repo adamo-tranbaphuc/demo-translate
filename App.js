@@ -18,7 +18,7 @@ import Home from "./src/containers/home";
 const App: () => Node = () => {
 
   return (
-    <SafeAreaView style={{flex:1, backgroundColor:'red'}}>
+    <SafeAreaView style={{flex:1}}>
       <Home/>
     </SafeAreaView>
   );

@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
     View,
-    Text, Pressable, TextInput
+    Text, Pressable, TextInput, Keyboard
 } from 'react-native';
 import styles from './style';
 import {postTranslate} from "../../services/api";
@@ -82,7 +82,7 @@ const Home = () => {
     }, [])
 
     return (
-        <View style={styles.container}>
+        <Pressable onPress={Keyboard.dismiss} style={styles.container}>
 
             <Text style={styles.txtNameApp}>Translation app</Text>
 
@@ -94,6 +94,7 @@ const Home = () => {
                     ref={refInput}
                     placeholder={"Enter words to translate"}
                     style={styles.txtInput}
+                    multiline
                     returnKeyType={'done'}
                     onChangeText={onChangeText}
                 />
@@ -102,6 +103,7 @@ const Home = () => {
                     placeholder={"Result"}
                     ref={refResultText}
                     editable={false}
+                    multiline
                     style={styles.txtResult}
                 />
 
@@ -115,7 +117,7 @@ const Home = () => {
 
             <Text style={styles.txtHoldToRecord}>Press and say</Text>
 
-        </View>
+        </Pressable>
     );
 };
 
