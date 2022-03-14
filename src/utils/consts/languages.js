@@ -1,0 +1,140 @@
+export const METHOD = [
+    {
+        name: "Google",
+        detail: ""
+    },
+    {
+        name: "Google custom",
+        detail: ""
+    },
+    {
+        name: "Azure",
+        detail: ""
+    }
+]
+
+export const METHOD_NAME = {
+    GOOGLE:"Google",
+    GOOGLE_CUSTOM:"Google custom",
+    AZURE:"Azure"
+}
+
+export const LANGUAGES = [
+    // {
+    //     name: "Vietnamese",
+    //     label: "Vietnamese",
+    //     code: 'vi-VN',
+    //     value: 'vi-VN',
+    //     languageCode: 'vi',
+    //     country: 'Vietnam',
+    //     countryCode: 'VN'
+    // },
+    {
+        name: "English",
+        label: "English",
+        code: 'en-US',
+        value: 'en-US',
+        languageCode: 'en',
+        country: 'UnitedState',
+        countryCode: 'US',
+    },
+    {
+        name: "Japanese",
+        label: "Japanese",
+        code: 'ja-JP',
+        value: 'ja-JP',
+        languageCode: 'ja',
+        country: 'Japan',
+        countryCode: 'JP',
+    },
+    {
+        name: "French",
+        label: "French",
+        code: 'fr-FR',
+        value: 'fr-FR',
+        languageCode: 'fr',
+        country: 'France',
+        countryCode: 'FR',
+    },
+    {
+        name: "Korean",
+        label: "Korean",
+        code: 'ko-KR',
+        value: 'ko-KR',
+        languageCode: 'ko',
+        country: 'South Korea',
+        countryCode: 'KR',
+    },
+    {
+        name: "Spanish",
+        label: "Spanish",
+        code: 'es-ES',
+        value: 'es-ES',
+        languageCode: 'es',
+        country: 'Spain',
+        countryCode: 'ES',
+    },
+    {
+        name: "Bulgarian",
+        label: "Bulgarian",
+        code: 'bg-BG',
+        value: 'bg-BG',
+        languageCode: 'bg',
+        country: 'Bulgaria',
+        countryCode: 'BG',
+    },
+    {
+        name: "Chinese, Mandarin",
+        label: "Chinese, Mandarin",
+        code: 'zh-CN',
+        value: 'zh-CN',
+        languageCode: 'zh',
+        country: 'Simplified, China',
+        countryCode: 'CN',
+    },
+    {
+        name: "German",
+        label: "German",
+        code: 'de-DE',
+        value: 'de-DE',
+        languageCode: 'de',
+        country: 'Germany',
+        countryCode: 'DE',
+    },
+    {
+        name: "Hindi",
+        label: "Hindi",
+        code: 'hi-IN',
+        value: 'hi-IN',
+        languageCode: 'hi',
+        country: 'India',
+        countryCode: 'IN',
+    },
+    {
+        name: "Russian",
+        label: "Russian",
+        code: 'ru-RU',
+        value: 'ru-RU',
+        languageCode: 'ru',
+        country: 'Russia',
+        countryCode: 'RU',
+    },
+    {
+        name: "Portuguese",
+        label: "Portuguese",
+        code: 'pt-PT',
+        value: 'pt-PT',
+        languageCode: 'pt',
+        country: 'Portugal',
+        countryCode: 'PT',
+    },
+    {
+        name: "Thai",
+        label: "Thai",
+        code: 'th-TH',
+        value: 'th-TH',
+        languageCode: 'th',
+        country: 'Thailand',
+        countryCode: 'TH',
+    },
+]

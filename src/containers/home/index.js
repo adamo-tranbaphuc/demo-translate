@@ -1,124 +1,256 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import {
-    View,
-    Text, Pressable, TextInput, Keyboard
-} from 'react-native';
-import styles from './style';
-import {postTranslate} from "../../services/api";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Voice from '@react-native-voice/voice';
-import * as Animatable from 'react-native-animatable';
-import debounce from "lodash.debounce";
+import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import {ScrollView, StatusBar, View} from "react-native";
+import BottomGroup from "../../components/home/bottomGroup";
+import styles from "./style";
+import ResultTranslate from "../../components/home/resultTranslate";
+import {MainLanguageContext} from "../../../App";
+import LottieView from "lottie-react-native";
+import AudioRecorderPlayer, {
+    AudioEncoderAndroidType,
+    AudioSet,
+    AudioSourceAndroidType,
+    AVEncoderAudioQualityIOSType,
+    AVEncodingOption,
+    RecordBackType
+} from "react-native-audio-recorder-player";
+import {azureDetectLanguage, recognizeRecord, recognizeRecordAzure, translateRecordText} from "../../services/api";
+import {LANGUAGES, METHOD_NAME} from "../../utils/consts/languages";
+import Header from "../../components/home/header";
+import AudioRecord from 'react-native-audio-record';
+import {Buffer} from "buffer";
 
-const PressableAnimatable = Animatable.createAnimatableComponent(Pressable);
-
+const header = Buffer.from([82, 73, 70, 70, 248, 167])
 const Home = () => {
 
-    const [recordStatus, setRecordStatus] = useState(false);
-
-    const refResultText = useRef();
-    const refInputText = useRef("");
-    const refInput = useRef();
-
-    const delayedQuery = debounce(valueInput => translate(valueInput), 1000);
-    const onChangeText = useCallback((text) => {
-        refInputText.current = text;
-        delayedQuery(refInputText.current);
-    }, []);
+    const {mainLanguage, method} = useContext(MainLanguageContext);
+    const refLanguageTranslate = useRef([LANGUAGES.find(language => language.code.toLowerCase() === mainLanguage.toLowerCase())]);
+    const [languageTranslateResult, setLanguageTranslateResult] = useState([]);
+    const [isRecording, setIsRecording] = useState(false);
+    const [showLoading, setShowLoading] = useState(false);
+    const refNumOfLanguage = useRef(2);
+    const audioRecorderPlayer: AudioRecorderPlayer = new AudioRecorderPlayer();
 
     useEffect(() => {
-        //Setting callbacks for the process status
-        Voice.onSpeechEnd = onSpeechEnd;
-        Voice.onSpeechResults = onSpeechResults;
+        AudioRecord.init({
+            sampleRate: 16000,  // default 44100
+            channels: 1,        // 1 or 2, default 1
+            bitsPerSample: 16,  // 8 or 16, default 16
+            audioSource: 6,     // android only (see below)
+            wavFile: 'audio.wav' // default 'audio.wav'
+        });
+        AudioRecord.on('data', data => {
+            // const chunks = [header]
+            const chunk = Buffer.from(data, 'base64');
+            // chunks.push(chunk)
+            // const pcm = wav.decode(Buffer.concat(chunks)).channelData
 
-        return () => {
-            //destroy the process after switching the screen
-            Voice.destroy().then(Voice.removeAllListeners);
-        };
-    }, []);
-
-    const onSpeechEnd = (e) => {
-        //Invoked when SpeechRecognizer stops recognition
-        console.log('onSpeechEnd: ', e);
-        setRecordStatus(false);
-    };
-
-    const onSpeechResults = (e) => {
-        //Invoked when SpeechRecognizer is finished recognizing
-        console.log('onSpeechResults: ', e);
-        if (e.value.length > 0) {
-            refInput.current.setNativeProps({text: e.value[0]})
-            refInputText.current =e.value[0];
-            translate(refInputText.current)
-        }
-    };
-
-
-    const startRecognizing = async () => {
-        //Starts listening for speech for a specific locale
-        try {
-            await Voice.start('ja-JP');
-            setRecordStatus(true);
-        } catch (e) {
-            //eslint-disable-next-line
-            console.error(e);
-        }
-    };
-
-    const stopRecognizing = async () => {
-        //Stops listening for speech
-        try {
-            await Voice.stop();
-            setRecordStatus(false);
-        } catch (e) {
-            //eslint-disable-next-line
-            console.error(e);
-        }
-    };
-
-    const translate = useCallback(async (value) => {
-        let resultTranslate = await postTranslate(value, 'ja', 'en')
-        refResultText.current.setNativeProps({text: resultTranslate})
+            // console.log('data', data);
+            // console.log('chunk size', chunk);
+            // console.log('pcm', pcm);
+        });
     }, [])
 
+    useEffect(() => {
+        refLanguageTranslate.current[0] = LANGUAGES.find(language => language.code.toLowerCase() === mainLanguage.toLowerCase());
+        setLanguageTranslateResult([])
+    }, [mainLanguage])
+
+    const onPressRecord = async () => {
+        if (isRecording) {
+            setShowLoading(true)
+            await stopRecord();
+        } else {
+            await startRecord();
+        }
+
+        setIsRecording(!isRecording);
+    }
+
+    const startRecord = async () => {
+        switch (method.name) {
+            case METHOD_NAME.GOOGLE:
+            case METHOD_NAME.GOOGLE_CUSTOM: {
+                onStartRecordGoogle();
+                break;
+            }
+            case METHOD_NAME.AZURE: {
+                onStartRecordAzure();
+                break;
+            }
+        }
+    }
+
+    const stopRecord = async () => {
+        switch (method.name) {
+            case METHOD_NAME.GOOGLE: {
+                onStopRecordGoogle();
+                break;
+            }
+            case METHOD_NAME.GOOGLE_CUSTOM: {
+                onStopRecordGoogle();
+                break;
+            }
+            case METHOD_NAME.AZURE: {
+                onStopRecordAzure()
+            }
+        }
+    }
+
+    const onStartRecordGoogle = useCallback(async () => {
+        const audioSet: AudioSet = {
+            AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
+            AudioSourceAndroid: AudioSourceAndroidType.MIC,
+            AVEncoderAudioQualityKeyIOS: AVEncoderAudioQualityIOSType.high,
+            AVNumberOfChannelsKeyIOS: 2,
+            AVFormatIDKeyIOS: AVEncodingOption.aac,
+            AudioSamplingRateAndroid: 16000,
+            AVSampleRateKeyIOS: 16000
+        };
+        console.log(audioSet)
+        // const dirs = RNFetchBlob.fs.dirs;
+        // const path = Platform.select({
+        //     ios: 'hello.m4a',
+        //     android: `${dirs.CacheDir}/sound.mp3`,
+        // });
+
+        //? Custom path
+        // const uri = await audioRecorderPlayer.startRecorder(
+        //   path,
+        //   audioSet,
+        // );
+
+        //? Default path
+        const uri = await audioRecorderPlayer.startRecorder(
+            undefined,
+            audioSet,
+        );
+
+        audioRecorderPlayer.addRecordBackListener((e: RecordBackType) => {
+            console.log('record-back', e);
+        });
+    }, []);
+
+    const onStopRecordGoogle = useCallback(async () => {
+        const result = await audioRecorderPlayer.stopRecorder();
+        audioRecorderPlayer.removeRecordBackListener();
+
+        await recognize(result);
+    }, [method]);
+
+    const onStartRecordAzure = useCallback(async () => {
+        AudioRecord.start();
+    }, []);
+
+    const onStopRecordAzure = useCallback(async () => {
+        let audioFile = await AudioRecord.stop();
+        await recognize(audioFile)
+    }, [method]);
+
+    const recognize = useCallback(async (filePath) => {
+
+        if (refLanguageTranslate.current.length < refNumOfLanguage.current) {
+            //phat hien tat ca
+            let resultRecognize = await onRecognize(filePath, LANGUAGES)
+            // let resultLanguage = recognizeResult(resultRecognize,LANGUAGES)
+            //
+            //
+            // // if (resultLanguage === refLanguageTranslate.current[0]) {
+            // //     setShowLoading(false);
+            // //     setLanguageTranslateResult([resultRecognize.transcript]);
+            // //     return;
+            // // }
+            //
+            // if (resultLanguage !== refLanguageTranslate.current[0]) {
+            //     refLanguageTranslate.current = refLanguageTranslate.current.concat(resultLanguage);
+            // }
+            //
+            // await translate(resultRecognize, resultLanguage);
+        } else {
+            // phat hien tu 2 ngon ngu hien tai
+            let resultRecognize = await onRecognize(filePath, refLanguageTranslate.current)
+            let resultLanguage =  recognizeResult(resultRecognize,refLanguageTranslate.current)
+
+            await translate(resultRecognize, resultLanguage)
+        }
+    }, [method])
+
+    const onRecognize = async (filePath, sourceLanguage) => {
+        switch (method.name) {
+            case METHOD_NAME.GOOGLE: {
+                return undefined;
+            }
+            case METHOD_NAME.GOOGLE_CUSTOM: {
+                return undefined;
+            }
+            case METHOD_NAME.AZURE: {
+                return await recognizeRecordAzure(filePath, sourceLanguage);
+            }
+        }
+    }
+
+    const recognizeResult = useCallback((resultRecognize, sourceLanguage) => {
+        if (resultRecognize.confidence === 0) {
+            setShowLoading(false);
+            setLanguageTranslateResult(["Lỗi: Không tìm thấy ngôn ngữ"])
+            return;
+        }
+
+        let resultLanguage = sourceLanguage.find(language => language.code.toLowerCase() === resultRecognize.languageCode.toLowerCase());
+
+        if (!resultLanguage) {
+            setShowLoading(false);
+            setLanguageTranslateResult(["Lỗi: Ngôn ngữ không được hỗ trợ"])
+        }
+
+        return resultLanguage;
+    }, [])
+
+    const translate = useCallback(async (resultRecognize, sourceLanguage) => {
+        let resultTranslates = await translateRecordText(resultRecognize.transcript, sourceLanguage.languageCode, refLanguageTranslate.current)
+        setShowLoading(false);
+        setLanguageTranslateResult(resultTranslates)
+    }, [])
+
+    const renderResult = useCallback((item, index) => {
+        return (
+            <ResultTranslate key={item + index} textResult={item}
+                             showLine={index !== languageTranslateResult.length - 1}/>
+        )
+    }, [languageTranslateResult])
+
+    const resetLanguage = useCallback(() => {
+        refLanguageTranslate.current = refLanguageTranslate.current.filter((_, index) => {
+            return index === 0;
+        })
+        setLanguageTranslateResult([])
+    }, [])
+
+    console.log(refLanguageTranslate)
+
     return (
-        <Pressable onPress={Keyboard.dismiss} style={styles.container}>
+        <View style={styles.container}>
+            <StatusBar
+                animated={true}
+                barStyle={'dark-content'}
+                backgroundColor={'#fff'}
+                translucent/>
 
-            <Text style={styles.txtNameApp}>Translation app</Text>
+            <Header resetLanguage={resetLanguage} mainLanguage={refLanguageTranslate.current[0]}
+                    addLanguage={refLanguageTranslate.current[1]}/>
 
-            <View style={styles.viewMain}>
-                {/*header*/}
+            <ScrollView contentContainerStyle={styles.scrollViewResults}>
 
+                {languageTranslateResult.map(renderResult)}
 
-                <TextInput
-                    ref={refInput}
-                    placeholder={"Enter words to translate"}
-                    style={styles.txtInput}
-                    multiline
-                    returnKeyType={'done'}
-                    onChangeText={onChangeText}
-                />
-                <View style={styles.viewStroke}/>
-                <TextInput
-                    placeholder={"Result"}
-                    ref={refResultText}
-                    editable={false}
-                    multiline
-                    style={styles.txtResult}
-                />
+                {showLoading && <LottieView autoPlay loop
+                                            source={require('../../assets/lotties/loading.json')}
+                                            style={styles.iconLoad}/>}
+            </ScrollView>
 
-                <PressableAnimatable animation={recordStatus ? "pulse" : ""} iterationCount="infinite"
-                                     style={styles.btnMic} onPress={recordStatus ? stopRecognizing : startRecognizing}>
-                    <Icon name={recordStatus?"record-circle":"microphone"} style={styles.iconMic}/>
-                </PressableAnimatable>
+            <BottomGroup onPressRecord={onPressRecord} isRecording={isRecording}/>
+        </View>
+    )
 
-
-            </View>
-
-            <Text style={styles.txtHoldToRecord}>Press and say</Text>
-
-        </Pressable>
-    );
-};
+}
 
 export default Home;

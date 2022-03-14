@@ -1,4 +1,2 @@
-export {
-    URL,
-    API_KEY
-} from "./apiParams";
+export * from "./apiParams";
+export * from './device'

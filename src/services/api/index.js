@@ -1,3 +1,2 @@
-export {
-    postTranslate
-} from './translatesAPI'
+export * from './googleAPI'
+export * from './azureApi'
