@@ -8,6 +8,7 @@ import {NavigationContainer} from "@react-navigation/native";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {PermissionsAndroid, Platform} from "react-native";
 import {METHOD} from "./src/utils/consts/languages";
+import {GENDER_VOICE} from "./src/utils/consts";
 
 const Stack = createNativeStackNavigator();
 
@@ -18,7 +19,8 @@ function App() {
 
     const [mainLanguage, setMainLanguage] = useState('en-US');
     const [method, setMethod] = useState(METHOD[0]);
-    const value = { mainLanguage, setMainLanguage, method, setMethod };
+    const [gender, setGender] = useState(GENDER_VOICE.MALE);
+    const value = { mainLanguage, setMainLanguage, method, setMethod, gender, setGender };
 
     useEffect(()=>{
         let askPermission = async ()=>{

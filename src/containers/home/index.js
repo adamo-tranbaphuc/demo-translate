@@ -16,15 +16,16 @@ import AudioRecorderPlayer, {
 import {
     recognizeRecordGoogleGroup,
     recognizeRecordGoogleSingle,
-    recognizeRecordGoogleTopGroup,
+    recognizeRecordGoogleTopGroup, textToSpeech,
     translateWord
 } from "../../services/api";
 import {LANGUAGES, METHOD_NAME} from "../../utils/consts/languages";
 import Header from "../../components/home/header";
+import {GENDER_VOICE} from "../../utils/consts";
 
 const Home = () => {
 
-    const {mainLanguage, method} = useContext(MainLanguageContext);
+    const {mainLanguage, method, gender} = useContext(MainLanguageContext);
     const refLanguageTranslate = useRef([LANGUAGES.find(language => language.code.toLowerCase() === mainLanguage.toLowerCase())]);
     const [languageTranslateResult, setLanguageTranslateResult] = useState([]);
     const [isRecording, setIsRecording] = useState(false);
@@ -118,7 +119,7 @@ const Home = () => {
 
             await translate(resultRecognize, resultLanguage)
         }
-    }, [method])
+    }, [method, gender])
 
     const onRecognize = async (filePath, sourceLanguage) => {
         switch (method.name) {
@@ -156,7 +157,10 @@ const Home = () => {
         let resultTranslates = await translateWord(resultRecognize.transcript, sourceLanguage.languageCode, refLanguageTranslate.current)
         setShowLoading(false);
         setLanguageTranslateResult(resultTranslates)
-    }, [])
+        let languageNeedSpeak = sourceLanguage===refLanguageTranslate.current[0]?refLanguageTranslate.current[1].code:refLanguageTranslate.current[0].code;
+        let textNeedSpeak = sourceLanguage===refLanguageTranslate.current[0]?resultTranslates[1]:resultTranslates[0];
+        await textToSpeech(textNeedSpeak,languageNeedSpeak,gender)
+    }, [gender])
 
     const renderResult = useCallback((item, index) => {
         return (

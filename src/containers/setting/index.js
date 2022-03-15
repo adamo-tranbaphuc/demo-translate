@@ -7,11 +7,12 @@ import DropDownPicker from "react-native-dropdown-picker";
 import Icon from "react-native-vector-icons/Entypo";
 import IconMa from "react-native-vector-icons/MaterialCommunityIcons";
 import {LANGUAGES, METHOD} from "../../utils/consts/languages";
+import {GENDER_VOICE_ARRAY} from "../../utils/consts";
 
 
 const Setting = () => {
 
-    const {mainLanguage, setMainLanguage, method, setMethod} = useContext(MainLanguageContext);
+    const {mainLanguage, setMainLanguage, method, setMethod, gender, setGender} = useContext(MainLanguageContext);
     const [mainLanguageValue, setMainLanguageValue] = useState(mainLanguage);
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState(LANGUAGES);
@@ -20,7 +21,7 @@ const Setting = () => {
         setMainLanguage(mainLanguageValue)
     }, [mainLanguageValue])
 
-    const renderRadio = useCallback((itemMethod) => {
+    const renderRadioMethod = useCallback((itemMethod) => {
         return (
             <TouchableOpacity key={itemMethod.name} style={styles.touchRadio} onPress={() => setMethod(itemMethod)}>
                 <IconMa name={method.name === itemMethod.name ? "radiobox-marked" : "radiobox-blank"} color={"#00BCD4"}
@@ -31,6 +32,17 @@ const Setting = () => {
         )
     }, [method])
 
+    const renderRadioGender = useCallback((itemGender) => {
+        return (
+            <TouchableOpacity key={itemGender} style={styles.touchRadio} onPress={() => setGender(itemGender)}>
+                <IconMa name={gender === itemGender ? "radiobox-marked" : "radiobox-blank"} color={"#00BCD4"}
+                        size={24}/>
+                <Text
+                    style={[styles.txtRadio, {fontWeight: gender === itemGender ? "bold" : "normal"}]}>{itemGender}</Text>
+            </TouchableOpacity>
+        )
+    }, [gender])
+
     return (
         <View style={styles.container}>
             <Header title={"Setting"}/>
@@ -38,7 +50,14 @@ const Setting = () => {
             <View style={styles.viewInfor}>
                 <Text style={styles.title}>Detection method</Text>
                 <View>
-                    {METHOD.map(renderRadio)}
+                    {METHOD.map(renderRadioMethod)}
+                </View>
+            </View>
+
+            <View style={styles.viewInfor}>
+                <Text style={styles.title}>Gender voice</Text>
+                <View>
+                    {GENDER_VOICE_ARRAY.map(renderRadioGender)}
                 </View>
             </View>
 
