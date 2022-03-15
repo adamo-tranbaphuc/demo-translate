@@ -1,34 +1,39 @@
 export const METHOD = [
     {
-        name: "Google",
+        name: "Group handling",
         detail: ""
     },
     {
-        name: "Google custom",
+        name: "Single handling",
         detail: ""
     },
     {
-        name: "Azure",
+        name: "Top group handling",
         detail: ""
-    }
+    },
+    // {
+    //     name: "Azure",
+    //     detail: ""
+    // }
 ]
 
 export const METHOD_NAME = {
-    GOOGLE:"Google",
-    GOOGLE_CUSTOM:"Google custom",
-    AZURE:"Azure"
+    GOOGLE_GROUP:"Group handling",
+    GOOGLE_TOP_GROUP:"Top group handling",
+    GOOGLE_SINGLE:"Single handling",
+    // AZURE:"Azure"
 }
 
 export const LANGUAGES = [
-    // {
-    //     name: "Vietnamese",
-    //     label: "Vietnamese",
-    //     code: 'vi-VN',
-    //     value: 'vi-VN',
-    //     languageCode: 'vi',
-    //     country: 'Vietnam',
-    //     countryCode: 'VN'
-    // },
+    {
+        name: "Vietnamese",
+        label: "Vietnamese",
+        code: 'vi-VN',
+        value: 'vi-VN',
+        languageCode: 'vi',
+        country: 'Vietnam',
+        countryCode: 'VN'
+    },
     {
         name: "English",
         label: "English",
@@ -86,8 +91,8 @@ export const LANGUAGES = [
     {
         name: "Chinese, Mandarin",
         label: "Chinese, Mandarin",
-        code: 'zh-CN',
-        value: 'zh-CN',
+        code: 'cmn-hans-cn',
+        value: 'cmn-hans-cn',
         languageCode: 'zh',
         country: 'Simplified, China',
         countryCode: 'CN',
@@ -136,5 +141,23 @@ export const LANGUAGES = [
         languageCode: 'th',
         country: 'Thailand',
         countryCode: 'TH',
+    },
+    {
+        name: "Italian",
+        label: "Italian",
+        code: 'it-IT',
+        value: 'it-IT',
+        languageCode: 'it',
+        country: 'Italy',
+        countryCode: 'IT',
+    },
+    {
+        name: "Lao",
+        label: "Lao",
+        code: 'lo-LA',
+        value: 'lo-LA',
+        languageCode: 'lo',
+        country: 'Laos',
+        countryCode: 'LA',
     },
 ]

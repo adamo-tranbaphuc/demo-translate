@@ -1,53 +1,12 @@
-import {API_KEY, URL_SPEECH_TO_TEXT, URL_TRANSLATE} from "../../utils/consts";
+import {API_KEY_GOOGLE, URL_SPEECH_TO_TEXT} from "../../utils/consts";
 import {generateParamRequest} from "../../utils/helpers";
 import {LANGUAGES} from "../../utils/consts/languages";
 import RNFS from 'react-native-fs'
 
-export async function fetchTranslateText(params) {
-    let paramsRequest = {
-        ...params,
-        format: 'text',
-        key: API_KEY
-    }
-
-    let urlToRequest = URL_TRANSLATE + generateParamRequest(paramsRequest);
-
-    return await fetch(urlToRequest, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        }
-    })
-        .then(response => response.json())
-        .then(jsonResponse => {
-            console.log(jsonResponse)
-            return jsonResponse.data.translations[0].translatedText
-        });
-}
-
-export async function translateRecordText(textNeedTranslate = "en", sourceLanguage = "en", targetLanguages = []) {
-
-    let requests = targetLanguages.map((item) => {
-
-        let params = {
-            q: textNeedTranslate,
-            source: sourceLanguage,
-            target: item.languageCode
-        }
-
-        return sourceLanguage === item.languageCode ? textNeedTranslate : fetchTranslateText(params);
-    })
-
-    return Promise.all(requests)
-        .then(response => {
-            return response;
-        })
-}
-
 export async function fetchTranslateAudio(body) {
 
     let paramsRequest = {
-        key: API_KEY
+        key: API_KEY_GOOGLE
     }
 
     let urlToRequest = URL_SPEECH_TO_TEXT + generateParamRequest(paramsRequest);
@@ -86,8 +45,8 @@ export async function fetchTranslateAudio(body) {
         })
 }
 
-export async function recognizeRecord(filepath, languageCode = LANGUAGES) {
-    let recordBase64 = await RNFS.readFile(filepath, "base64")
+export async function recognizeRecordGoogleSingle(filePath, languageCode = LANGUAGES) {
+    let recordBase64 = await RNFS.readFile(filePath, "base64")
 
     let requests = languageCode.map((item) => {
 
@@ -95,8 +54,7 @@ export async function recognizeRecord(filepath, languageCode = LANGUAGES) {
             config: {
                 encoding: "WEBM_OPUS",
                 sampleRateHertz: 16000,
-                languageCode: "es-ES",
-                alternativeLanguageCodes:["es-ES", "ja-JP", "ko-KR", "th-TH"]
+                languageCode: item.code
             },
             audio: {
                 content: recordBase64

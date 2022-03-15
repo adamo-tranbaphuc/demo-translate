@@ -13,13 +13,15 @@ import AudioRecorderPlayer, {
     AVEncodingOption,
     RecordBackType
 } from "react-native-audio-recorder-player";
-import {azureDetectLanguage, recognizeRecord, recognizeRecordAzure, translateRecordText} from "../../services/api";
+import {
+    recognizeRecordGoogleGroup,
+    recognizeRecordGoogleSingle,
+    recognizeRecordGoogleTopGroup,
+    translateWord
+} from "../../services/api";
 import {LANGUAGES, METHOD_NAME} from "../../utils/consts/languages";
 import Header from "../../components/home/header";
-import AudioRecord from 'react-native-audio-record';
-import {Buffer} from "buffer";
 
-const header = Buffer.from([82, 73, 70, 70, 248, 167])
 const Home = () => {
 
     const {mainLanguage, method} = useContext(MainLanguageContext);
@@ -31,72 +33,22 @@ const Home = () => {
     const audioRecorderPlayer: AudioRecorderPlayer = new AudioRecorderPlayer();
 
     useEffect(() => {
-        AudioRecord.init({
-            sampleRate: 16000,  // default 44100
-            channels: 1,        // 1 or 2, default 1
-            bitsPerSample: 16,  // 8 or 16, default 16
-            audioSource: 6,     // android only (see below)
-            wavFile: 'audio.wav' // default 'audio.wav'
-        });
-        AudioRecord.on('data', data => {
-            // const chunks = [header]
-            const chunk = Buffer.from(data, 'base64');
-            // chunks.push(chunk)
-            // const pcm = wav.decode(Buffer.concat(chunks)).channelData
-
-            // console.log('data', data);
-            // console.log('chunk size', chunk);
-            // console.log('pcm', pcm);
-        });
-    }, [])
-
-    useEffect(() => {
         refLanguageTranslate.current[0] = LANGUAGES.find(language => language.code.toLowerCase() === mainLanguage.toLowerCase());
         setLanguageTranslateResult([])
     }, [mainLanguage])
 
     const onPressRecord = async () => {
+        setIsRecording(!isRecording);
         if (isRecording) {
             setShowLoading(true)
-            await stopRecord();
+            let result = await onStopRecord();
+            await recognize(result);
         } else {
-            await startRecord();
-        }
-
-        setIsRecording(!isRecording);
-    }
-
-    const startRecord = async () => {
-        switch (method.name) {
-            case METHOD_NAME.GOOGLE:
-            case METHOD_NAME.GOOGLE_CUSTOM: {
-                onStartRecordGoogle();
-                break;
-            }
-            case METHOD_NAME.AZURE: {
-                onStartRecordAzure();
-                break;
-            }
+            onStartRecord();
         }
     }
 
-    const stopRecord = async () => {
-        switch (method.name) {
-            case METHOD_NAME.GOOGLE: {
-                onStopRecordGoogle();
-                break;
-            }
-            case METHOD_NAME.GOOGLE_CUSTOM: {
-                onStopRecordGoogle();
-                break;
-            }
-            case METHOD_NAME.AZURE: {
-                onStopRecordAzure()
-            }
-        }
-    }
-
-    const onStartRecordGoogle = useCallback(async () => {
+    const onStartRecord = useCallback(async () => {
         const audioSet: AudioSet = {
             AudioEncoderAndroid: AudioEncoderAndroidType.AAC,
             AudioSourceAndroid: AudioSourceAndroidType.MIC,
@@ -130,45 +82,39 @@ const Home = () => {
         });
     }, []);
 
-    const onStopRecordGoogle = useCallback(async () => {
+    const onStopRecord = useCallback(async () => {
         const result = await audioRecorderPlayer.stopRecorder();
         audioRecorderPlayer.removeRecordBackListener();
-
-        await recognize(result);
-    }, [method]);
-
-    const onStartRecordAzure = useCallback(async () => {
-        AudioRecord.start();
+        return result;
     }, []);
-
-    const onStopRecordAzure = useCallback(async () => {
-        let audioFile = await AudioRecord.stop();
-        await recognize(audioFile)
-    }, [method]);
 
     const recognize = useCallback(async (filePath) => {
 
         if (refLanguageTranslate.current.length < refNumOfLanguage.current) {
             //phat hien tat ca
             let resultRecognize = await onRecognize(filePath, LANGUAGES)
-            // let resultLanguage = recognizeResult(resultRecognize,LANGUAGES)
-            //
-            //
-            // // if (resultLanguage === refLanguageTranslate.current[0]) {
-            // //     setShowLoading(false);
-            // //     setLanguageTranslateResult([resultRecognize.transcript]);
-            // //     return;
-            // // }
-            //
-            // if (resultLanguage !== refLanguageTranslate.current[0]) {
-            //     refLanguageTranslate.current = refLanguageTranslate.current.concat(resultLanguage);
-            // }
-            //
-            // await translate(resultRecognize, resultLanguage);
+            console.log(resultRecognize)
+            let resultLanguage = recognizeResult(resultRecognize, LANGUAGES)
+
+            if(resultLanguage===undefined) return;
+
+            if (resultLanguage === refLanguageTranslate.current[0]) {
+                setShowLoading(false);
+                setLanguageTranslateResult([resultRecognize.transcript]);
+                return;
+            }
+
+            if (resultLanguage !== refLanguageTranslate.current[0]) {
+                refLanguageTranslate.current = refLanguageTranslate.current.concat(resultLanguage);
+            }
+            console.log("resultLanguage")
+            console.log(resultLanguage)
+            await translate(resultRecognize, resultLanguage);
         } else {
             // phat hien tu 2 ngon ngu hien tai
             let resultRecognize = await onRecognize(filePath, refLanguageTranslate.current)
-            let resultLanguage =  recognizeResult(resultRecognize,refLanguageTranslate.current)
+            let resultLanguage = recognizeResult(resultRecognize, refLanguageTranslate.current)
+            if(resultLanguage===undefined) return;
 
             await translate(resultRecognize, resultLanguage)
         }
@@ -176,14 +122,14 @@ const Home = () => {
 
     const onRecognize = async (filePath, sourceLanguage) => {
         switch (method.name) {
-            case METHOD_NAME.GOOGLE: {
-                return undefined;
+            case METHOD_NAME.GOOGLE_GROUP: {
+                return await recognizeRecordGoogleGroup(filePath, sourceLanguage);
             }
-            case METHOD_NAME.GOOGLE_CUSTOM: {
-                return undefined;
+            case METHOD_NAME.GOOGLE_SINGLE: {
+                return await recognizeRecordGoogleSingle(filePath, sourceLanguage);
             }
-            case METHOD_NAME.AZURE: {
-                return await recognizeRecordAzure(filePath, sourceLanguage);
+            case METHOD_NAME.GOOGLE_TOP_GROUP: {
+                return await recognizeRecordGoogleTopGroup(filePath, sourceLanguage);
             }
         }
     }
@@ -191,22 +137,23 @@ const Home = () => {
     const recognizeResult = useCallback((resultRecognize, sourceLanguage) => {
         if (resultRecognize.confidence === 0) {
             setShowLoading(false);
-            setLanguageTranslateResult(["Lỗi: Không tìm thấy ngôn ngữ"])
-            return;
+            setLanguageTranslateResult(["Error: Language not found"])
+            return undefined;
         }
 
         let resultLanguage = sourceLanguage.find(language => language.code.toLowerCase() === resultRecognize.languageCode.toLowerCase());
 
         if (!resultLanguage) {
             setShowLoading(false);
-            setLanguageTranslateResult(["Lỗi: Ngôn ngữ không được hỗ trợ"])
+            setLanguageTranslateResult(["Error: Unsupported language"])
+            return undefined;
         }
 
         return resultLanguage;
     }, [])
 
     const translate = useCallback(async (resultRecognize, sourceLanguage) => {
-        let resultTranslates = await translateRecordText(resultRecognize.transcript, sourceLanguage.languageCode, refLanguageTranslate.current)
+        let resultTranslates = await translateWord(resultRecognize.transcript, sourceLanguage.languageCode, refLanguageTranslate.current)
         setShowLoading(false);
         setLanguageTranslateResult(resultTranslates)
     }, [])
@@ -225,7 +172,6 @@ const Home = () => {
         setLanguageTranslateResult([])
     }, [])
 
-    console.log(refLanguageTranslate)
 
     return (
         <View style={styles.container}>
