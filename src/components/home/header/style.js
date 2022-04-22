@@ -1,6 +1,7 @@
 import React from 'react';
 import {Dimensions, StyleSheet,} from 'react-native';
 import {SIZES} from "../../../utils/consts";
+import {SHADOW_3} from "../../../utils/consts/shadows";
 
 
 const styles = StyleSheet.create({
@@ -22,6 +23,36 @@ const styles = StyleSheet.create({
         fontSize:34,
         color:"#00BCD4",
         marginHorizontal:8
+    },
+    pickerStyle: {
+
+        zIndex: 2,
+        borderRadius: 8,
+        borderWidth: 0,
+        height: 40,
+        backgroundColor: "#fff",
+    },
+    dropdownContainerStyles: {
+        zIndex: 2,
+
+        borderRadius: 8,
+        borderWidth: 0,
+        backgroundColor: "#fff",
+        ...SHADOW_3
+    },
+    dropdownContainer: {
+        width: "45%",
+        flex: 3,
+        height: 40,
+    },
+    txtLabel: {
+        fontSize: 18,
+        color: "#8c0b0b",
+        textAlign: 'right'
+    },
+    txtDropdownStyle: {
+        fontSize: 18,
+        color: "#7c7c7c"
     }
 });
 

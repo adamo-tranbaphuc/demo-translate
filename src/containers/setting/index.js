@@ -8,11 +8,23 @@ import Icon from "react-native-vector-icons/Entypo";
 import IconMa from "react-native-vector-icons/MaterialCommunityIcons";
 import {LANGUAGES, METHOD} from "../../utils/consts/languages";
 import {GENDER_VOICE_ARRAY} from "../../utils/consts";
+import {Slider} from "@miblanchard/react-native-slider";
 
 
 const Setting = () => {
 
-    const {mainLanguage, setMainLanguage, method, setMethod, gender, setGender} = useContext(MainLanguageContext);
+    const {
+        mainLanguage,
+        setMainLanguage,
+        method,
+        setMethod,
+        gender,
+        setGender,
+        timeCut,
+        setTimeCut,
+        sensitivity,
+        setSensitivity
+    } = useContext(MainLanguageContext);
     const [mainLanguageValue, setMainLanguageValue] = useState(mainLanguage);
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState(LANGUAGES);
@@ -42,10 +54,45 @@ const Setting = () => {
             </TouchableOpacity>
         )
     }, [gender])
-
+    console.log(timeCut)
     return (
         <View style={styles.container}>
             <Header title={"Setting"}/>
+
+            <View style={[styles.viewInfor, {flexDirection: 'column'}]}>
+                <Text style={styles.title}>Sentence break time (millisecond)</Text>
+                <Text
+                    style={[styles.title, {alignSelf: 'center', fontWeight: 'bold'}]}>{timeCut + " millisecond"}</Text>
+                <Slider
+                    maximumTrackTintColor={"#E1F5FE"}
+                    minimumTrackTintColor={"#00BCD4"}
+                    thumbTintColor={"#039BE5"}
+                    step={200}
+                    value={timeCut}
+                    onValueChange={value => setTimeCut(value[0])}
+                    maximumValue={3000}
+                    minimumValue={600}
+                />
+            </View>
+
+            <View style={[styles.viewInfor, {flexDirection: 'column'}]}>
+                <Text style={styles.title}>Sensitivity to sound</Text>
+                <Text style={[styles.title, {
+                    alignSelf: 'center',
+                    fontWeight: 'bold'
+                }]}>{sensitivity === 20 ? "normal" : (sensitivity === 15 ? "low" : "high")}</Text>
+                <Slider
+                    containerStyle={{width: '80%', alignSelf: 'center'}}
+                    maximumTrackTintColor={"#E1F5FE"}
+                    minimumTrackTintColor={"#00BCD4"}
+                    thumbTintColor={"#039BE5"}
+                    step={5}
+                    value={sensitivity}
+                    onValueChange={value => setSensitivity(value[0])}
+                    maximumValue={25}
+                    minimumValue={15}
+                />
+            </View>
 
             <View style={styles.viewInfor}>
                 <Text style={styles.title}>Detection method</Text>

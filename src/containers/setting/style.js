@@ -28,7 +28,8 @@ const styles = StyleSheet.create({
     },
     txtRadio: {
         marginLeft: 8,
-        fontSize: 18
+        fontSize: 18,
+        color: "#565656",
     },
     pickerStyle: {
         zIndex: 2,

@@ -5,7 +5,7 @@ import LottieView from 'lottie-react-native';
 import styles from "./style";
 import {useNavigation} from "@react-navigation/native";
 
-const BottomGroup = React.memo(({onPressRecord, isRecording}) => {
+const BottomGroup = React.memo(({onPressRecord, isRecording, isAppSpeaking}) => {
 
     const iconMic = useRef();
 
@@ -16,12 +16,15 @@ const BottomGroup = React.memo(({onPressRecord, isRecording}) => {
     }, [])
 
     useEffect(() => {
+        if(isAppSpeaking){
+            iconMic.current.play(69, 69);
+        }else
         if (isRecording) {
             iconMic.current.play(0, 69);
         } else {
             iconMic.current.play(69, 69);
         }
-    }, [isRecording])
+    }, [isRecording, isAppSpeaking])
 
     return (
         <View style={styles.container} pointerEvents={"box-none"}>
@@ -35,6 +38,20 @@ const BottomGroup = React.memo(({onPressRecord, isRecording}) => {
 
                 <TouchableOpacity onPress={onPressRecord}>
                     <LottieView ref={iconMic} speed={1.5}
+                                colorFilters={[
+                                    {
+                                        keypath: 'base',
+                                        color: isAppSpeaking?"#90A4AE":(isRecording?'#F00000':"#00BCD4"),
+                                    },
+                                    {
+                                        keypath: 'Base Layer 4',
+                                        color: isAppSpeaking?"#90A4AE":(isRecording?'#F00000':"#B2EBF2"),
+                                    },
+                                    {
+                                        keypath: 'Base Layer 3',
+                                        color: isAppSpeaking?"#90A4AE":(isRecording?'#F00000':"#4DD0E1"),
+                                    },
+                                ]}
                                 source={require('../../../assets/lotties/mic.json')}
                                 style={styles.iconMic}/>
                 </TouchableOpacity>

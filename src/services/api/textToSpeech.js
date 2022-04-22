@@ -35,10 +35,7 @@ export async function textToSpeech(text, languageCode, gender = GENDER_VOICE.MAL
         .then(response => response.json())
         .then(jsonResponse => {
             const path = `${RNFS.DocumentDirectoryPath}/textToSpeech.mp3`;
-            RNFS.writeFile(path, jsonResponse.audioContent, 'base64').then(() => playSound())
-            const playSound = () => {
-                const sound = new Sound(path, '', () => sound.play())
-            }
+            return RNFS.writeFile(path, jsonResponse.audioContent, 'base64').then(() => path);
         })
         .catch((error) => {
             console.log(error)

@@ -20,7 +20,9 @@ function App() {
     const [mainLanguage, setMainLanguage] = useState('en-US');
     const [method, setMethod] = useState(METHOD[0]);
     const [gender, setGender] = useState(GENDER_VOICE.MALE);
-    const value = { mainLanguage, setMainLanguage, method, setMethod, gender, setGender };
+    const [timeCut, setTimeCut] = useState(1500);
+    const [sensitivity, setSensitivity] = useState(20);
+    const value = { mainLanguage, setMainLanguage, method, setMethod, gender, setGender, timeCut, setTimeCut, sensitivity, setSensitivity };
 
     useEffect(()=>{
         let askPermission = async ()=>{

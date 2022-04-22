@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@flyerhq/react-native-android-uri-path": "^2.3.0",
+    "@miblanchard/react-native-slider": "^2.1.0",
     "@react-native-picker/picker": "^2.3.1",
     "@react-native-voice/voice": "^3.2.2",
     "@react-navigation/native": "^6.0.8",
