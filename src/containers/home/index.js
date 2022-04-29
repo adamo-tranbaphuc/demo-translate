@@ -1,5 +1,5 @@
 import React, {useCallback, useContext, useEffect, useRef, useState} from 'react';
-import {ScrollView, StatusBar, Text, View} from "react-native";
+import {Pressable, ScrollView, StatusBar, Text, View} from "react-native";
 import BottomGroup from "../../components/home/bottomGroup";
 import styles from "./style";
 import ResultTranslate from "../../components/home/resultTranslate";
@@ -45,6 +45,7 @@ const Home = () => {
     const [showLoading, setShowLoading] = useState(false);
     const refNumOfLanguage = useRef(2);
     const audioRecorderPlayer: AudioRecorderPlayer = useRef(new AudioRecorderPlayer()).current;
+    const refHeader = useRef();
 
     const refFlagRecord = useRef({timeStart: 0, haveWords: false});
 
@@ -280,9 +281,11 @@ const Home = () => {
                 resetLanguage()
         }
     }
-    console.log('render cha')
+
     return (
-        <View style={styles.container}>
+        <Pressable style={styles.container} onPress={() => {
+            refHeader.current.closeDropdownPicker()
+        }}>
             <StatusBar
                 animated={true}
                 barStyle={'dark-content'}
@@ -290,26 +293,28 @@ const Home = () => {
                 translucent/>
 
             <Header resetLanguage={resetLanguage} mainLanguage={refLanguageTranslate.current[0]}
-                    addLanguage={refLanguageTranslate.current[1]} setManualSecondLanguage={setManualSecondLanguage}/>
+                    addLanguage={refLanguageTranslate.current[1]} setManualSecondLanguage={setManualSecondLanguage}
+                    ref={refHeader}/>
 
-            <ScrollView contentContainerStyle={styles.scrollViewResults}>
+                <ScrollView contentContainerStyle={styles.scrollViewResults}>
+                    <View onStartShouldSetResponder={() => true}>
+                        {languageTranslateResult.map(renderResult)}
 
-                {languageTranslateResult.map(renderResult)}
+                        {showLoading && (<View style={{alignItems: 'center'}}>
+                            <Text style={{
+                                color: "#565656", marginHorizontal: 40, textAlign: 'center', lineHeight: 32,
+                                fontSize: 22,
+                            }}>The waiting time will be longer while searching for the language</Text>
+                            <LottieView autoPlay loop
+                                        source={require('../../assets/lotties/loading.json')}
+                                        style={styles.iconLoad}/>
+                        </View>)}
+                    </View>
+                </ScrollView>
 
-                {showLoading && (<View style={{alignItems: 'center'}}>
-                    <Text style={{
-                        color: "#565656", marginHorizontal: 40, textAlign: 'center', lineHeight: 32,
-                        fontSize: 22,
-                    }}>The waiting time will be longer while searching for the language</Text>
-                    <LottieView autoPlay loop
-                                source={require('../../assets/lotties/loading.json')}
-                                style={styles.iconLoad}/>
-                </View>)}
-
-            </ScrollView>
 
             <BottomGroup onPressRecord={onPressRecord} isRecording={isRecording} isAppSpeaking={isAppSpeaking}/>
-        </View>
+        </Pressable>
     )
 
 }

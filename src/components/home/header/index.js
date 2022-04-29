@@ -5,38 +5,47 @@ import styles from "./style";
 import DropDownPicker from "react-native-dropdown-picker";
 import {LANGUAGES} from "../../../utils/consts/languages";
 
-const Header = React.memo(({mainLanguage, addLanguage, resetLanguage, setManualSecondLanguage}) => {
+const Header = React.forwardRef(({mainLanguage, addLanguage, resetLanguage, setManualSecondLanguage}, ref) => {
 
     const [secondLanguageValue, setSecondLanguageValue] = useState(addLanguage?.value);
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState(LANGUAGES);
 
-    useEffect(() => {
-            if(addLanguage){
-                if(secondLanguageValue){
-                    if (addLanguage.value !== secondLanguageValue)
-                        setManualSecondLanguage(secondLanguageValue);
-                }
-            }else {
-                if(secondLanguageValue){
-                    setManualSecondLanguage(secondLanguageValue);
-                }
+    React.useImperativeHandle(
+        ref,
+        () => ({
+            closeDropdownPicker() {
+                setOpen(false);
             }
+        })
+    );
+
+    useEffect(() => {
+        if(addLanguage){
+            if(secondLanguageValue){
+                if (addLanguage.value !== secondLanguageValue)
+                    setManualSecondLanguage(secondLanguageValue);
+            }
+        }else {
+            if(secondLanguageValue){
+                setManualSecondLanguage(secondLanguageValue);
+            }
+        }
     }, [secondLanguageValue])
 
     useEffect(() => {
-            if(addLanguage){
-                if(secondLanguageValue){
-                    if (addLanguage.value !== secondLanguageValue)
-                        setSecondLanguageValue(addLanguage.value);
-                }else {
+        if(addLanguage){
+            if(secondLanguageValue){
+                if (addLanguage.value !== secondLanguageValue)
                     setSecondLanguageValue(addLanguage.value);
-                }
             }else {
-                if(secondLanguageValue){
-                    setSecondLanguageValue(addLanguage);
-                }
+                setSecondLanguageValue(addLanguage.value);
             }
+        }else {
+            if(secondLanguageValue){
+                setSecondLanguageValue(addLanguage);
+            }
+        }
     }, [addLanguage])
 
     return (
@@ -46,8 +55,6 @@ const Header = React.memo(({mainLanguage, addLanguage, resetLanguage, setManualS
             <TouchableOpacity onPress={resetLanguage}>
                 <Icon name={'reload'} style={styles.iconReload}/>
             </TouchableOpacity>
-
-            {/*<Text style={[styles.textLanguage,{textAlign:'right'}]}>{addLanguage?.name || ""}</Text>*/}
 
             <DropDownPicker
                 // zIndex={2}
@@ -88,4 +95,4 @@ const Header = React.memo(({mainLanguage, addLanguage, resetLanguage, setManualS
     );
 });
 
-export default Header;
+export default React.memo(Header);

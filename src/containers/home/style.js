@@ -9,9 +9,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
     },
     scrollViewResults: {
-        height: (Dimensions.get("screen").height) * 0.86,
-        paddingBottom: (Dimensions.get("screen").height) * 0.08,
-        alignItems:'center'
+        // backgroundColor:'red',
+        // height: (Dimensions.get("screen").height) * 0.86,
+        paddingBottom: (Dimensions.get("screen").height) * 0.22,
+        alignItems:'center',
+        // flex:1
     },
     iconLoad: {
         width: '50%',
